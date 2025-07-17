@@ -9,7 +9,6 @@ class VolunteerFeedbackApp {
         };
         this.currentTab = 'submit';
         this.filteredResults = [];
-        this.apiUrl = 'http://localhost:3001/feedback';
 
         this.initializeEventListeners();
         this.loadFeedback();
@@ -89,7 +88,7 @@ class VolunteerFeedbackApp {
         });
     }
 
-    async submitFeedback() {
+    submitFeedback() {
         const formData = {
             rescueName: document.getElementById('rescueName').value,
             volunteerName: document.getElementById('volunteerName').value,
@@ -112,22 +111,17 @@ class VolunteerFeedbackApp {
             return;
         }
 
-        try {
-            // Save feedback to API
-            await this.saveFeedback(formData);
-            
-            // Reset form
-            this.resetForm();
+        // Save feedback to localStorage
+        this.saveFeedback(formData);
+        
+        // Reset form
+        this.resetForm();
 
-            // Reload feedback data
-            await this.loadFeedback();
+        // Reload feedback data
+        this.loadFeedback();
 
-            // Show success message
-            this.showSuccessMessage();
-        } catch (error) {
-            console.error('Error saving feedback:', error);
-            alert('Failed to save feedback. Please try again.');
-        }
+        // Show success message
+        this.showSuccessMessage();
     }
 
     resetForm() {
@@ -382,46 +376,14 @@ class VolunteerFeedbackApp {
         }
     }
 
-    // API Methods for persistent storage
-    async loadFeedback() {
-        try {
-            const response = await fetch(this.apiUrl);
-            if (response.ok) {
-                this.feedbackData = await response.json();
-                // Sort by timestamp (newest first)
-                this.feedbackData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            } else {
-                console.warn('Failed to load feedback from server, using localStorage fallback');
-                this.loadFromLocalStorage();
-            }
-        } catch (error) {
-            console.warn('Server not available, using localStorage fallback:', error);
-            this.loadFromLocalStorage();
-        }
-        
+    // localStorage Methods for persistent storage
+    loadFeedback() {
+        this.loadFromLocalStorage();
         this.displayFeedback();
     }
 
-    async saveFeedback(feedbackData) {
-        try {
-            const response = await fetch(this.apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(feedbackData)
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to save to server');
-            }
-
-            return await response.json();
-        } catch (error) {
-            console.warn('Failed to save to server, using localStorage fallback:', error);
-            this.saveToLocalStorage(feedbackData);
-            throw error;
-        }
+    saveFeedback(feedbackData) {
+        this.saveToLocalStorage(feedbackData);
     }
 
     // Fallback methods for when server is not available
