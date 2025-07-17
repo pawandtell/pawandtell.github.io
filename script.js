@@ -88,7 +88,7 @@ class VolunteerFeedbackApp {
         });
     }
 
-    submitFeedback() {
+    async submitFeedback() {
         const formData = {
             rescueName: document.getElementById('rescueName').value,
             volunteerName: document.getElementById('volunteerName').value,
@@ -111,17 +111,22 @@ class VolunteerFeedbackApp {
             return;
         }
 
-        // Save feedback to localStorage
-        this.saveFeedback(formData);
-        
-        // Reset form
-        this.resetForm();
+        try {
+            // Save feedback to Firebase
+            await this.saveFeedback(formData);
+            
+            // Reset form
+            this.resetForm();
 
-        // Reload feedback data
-        this.loadFeedback();
+            // Reload feedback data
+            await this.loadFeedback();
 
-        // Show success message
-        this.showSuccessMessage();
+            // Show success message
+            this.showSuccessMessage();
+        } catch (error) {
+            console.error('Error saving feedback:', error);
+            alert('Failed to save feedback. Please try again.');
+        }
     }
 
     resetForm() {
@@ -376,17 +381,51 @@ class VolunteerFeedbackApp {
         }
     }
 
-    // localStorage Methods for persistent storage
-    loadFeedback() {
-        this.loadFromLocalStorage();
+    // Firebase Methods for persistent storage
+    async loadFeedback() {
+        try {
+            if (window.firebaseDB) {
+                const q = window.firebaseQuery(
+                    window.firebaseCollection(window.firebaseDB, "feedback"), 
+                    window.firebaseOrderBy("timestamp", "desc")
+                );
+                const querySnapshot = await window.firebaseGetDocs(q);
+                this.feedbackData = [];
+                querySnapshot.forEach((doc) => {
+                    this.feedbackData.push({ id: doc.id, ...doc.data() });
+                });
+            } else {
+                console.warn('Firebase not available, using localStorage fallback');
+                this.loadFromLocalStorage();
+            }
+        } catch (error) {
+            console.error('Error loading from Firebase:', error);
+            this.loadFromLocalStorage();
+        }
+        
         this.displayFeedback();
     }
 
-    saveFeedback(feedbackData) {
-        this.saveToLocalStorage(feedbackData);
+    async saveFeedback(feedbackData) {
+        try {
+            if (window.firebaseDB) {
+                const docRef = await window.firebaseAddDoc(
+                    window.firebaseCollection(window.firebaseDB, "feedback"), 
+                    feedbackData
+                );
+                console.log("Document written with ID: ", docRef.id);
+            } else {
+                throw new Error('Firebase not available');
+            }
+        } catch (error) {
+            console.error('Error saving to Firebase:', error);
+            // Fallback to localStorage
+            this.saveToLocalStorage(feedbackData);
+            throw error;
+        }
     }
 
-    // Fallback methods for when server is not available
+    // Fallback methods for when Firebase is not available
     loadFromLocalStorage() {
         this.feedbackData = JSON.parse(localStorage.getItem('volunteerFeedback')) || [];
     }
