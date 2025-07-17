@@ -5,12 +5,13 @@
 // 4. Replace the config below with your project's config
 
 const firebaseConfig = {
-  apiKey: "your-api-key",
-  authDomain: "your-project.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "your-app-id"
+  apiKey: "AIzaSyBWX_Sx8sE49e6uMtLwNXMXKJEL44NLthI",
+  authDomain: "pawandtell-ffce7.firebaseapp.com",
+  projectId: "pawandtell-ffce7",
+  storageBucket: "pawandtell-ffce7.firebasestorage.app",
+  messagingSenderId: "671195041274",
+  appId: "1:671195041274:web:9422d5326c0c177f556843",
+  measurementId: "G-VL9K8DG232"  
 };
 
 // Initialize Firebase
