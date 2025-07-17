@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animal Rescue Volunteer Feedback</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🐾 Rescue Volunteer Hub</h1>
+            <p>Rate and share feedback about your volunteer experience</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="tabs">
+            <button class="tab-button active" data-tab="submit">Submit Feedback</button>
+            <button class="tab-button" data-tab="search">Search Reviews</button>
+        </div>
+
+        <section id="submit-tab" class="tab-content active feedback-form">
+            <h2>Submit Your Feedback</h2>
+            <form id="feedbackForm">
+                <div class="form-group">
+                    <label for="rescueName">Animal Rescue Name *</label>
+                    <input type="text" id="rescueName" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="volunteerName">Your Name *</label>
+                    <input type="text" id="volunteerName" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email (optional)</label>
+                    <input type="email" id="email">
+                </div>
+
+                <div class="form-group">
+                    <label for="volunteerType">Type of Volunteer Work</label>
+                    <select id="volunteerType">
+                        <option value="">Select activity</option>
+                        <option value="animal-care">Animal Care</option>
+                        <option value="dog-walking">Dog Walking</option>
+                        <option value="cat-socialization">Cat Socialization</option>
+                        <option value="cleaning">Cleaning & Maintenance</option>
+                        <option value="events">Events & Fundraising</option>
+                        <option value="transport">Animal Transport</option>
+                        <option value="admin">Administrative</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Overall Rating *</label>
+                    <div class="rating-stars" id="overallRating">
+                        <span class="star" data-rating="1">★</span>
+                        <span class="star" data-rating="2">★</span>
+                        <span class="star" data-rating="3">★</span>
+                        <span class="star" data-rating="4">★</span>
+                        <span class="star" data-rating="5">★</span>
+                    </div>
+                </div>
+
+                <div class="rating-categories">
+                    <div class="rating-item">
+                        <label>Organization & Communication</label>
+                        <div class="rating-stars" data-category="organization">
+                            <span class="star" data-rating="1">★</span>
+                            <span class="star" data-rating="2">★</span>
+                            <span class="star" data-rating="3">★</span>
+                            <span class="star" data-rating="4">★</span>
+                            <span class="star" data-rating="5">★</span>
+                        </div>
+                    </div>
+
+                    <div class="rating-item">
+                        <label>Staff Support & Training</label>
+                        <div class="rating-stars" data-category="support">
+                            <span class="star" data-rating="1">★</span>
+                            <span class="star" data-rating="2">★</span>
+                            <span class="star" data-rating="3">★</span>
+                            <span class="star" data-rating="4">★</span>
+                            <span class="star" data-rating="5">★</span>
+                        </div>
+                    </div>
+
+                    <div class="rating-item">
+                        <label>Facility Conditions</label>
+                        <div class="rating-stars" data-category="facility">
+                            <span class="star" data-rating="1">★</span>
+                            <span class="star" data-rating="2">★</span>
+                            <span class="star" data-rating="3">★</span>
+                            <span class="star" data-rating="4">★</span>
+                            <span class="star" data-rating="5">★</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="feedback">Your Feedback *</label>
+                    <textarea id="feedback" rows="5" placeholder="Share your experience, suggestions, or any concerns..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="recommend">
+                        I would recommend this rescue to other volunteers
+                    </label>
+                </div>
+
+                <button type="submit" class="submit-btn">Submit Feedback</button>
+            </form>
+        </section>
+
+        <section id="search-tab" class="tab-content search-section">
+            <h2>Search Animal Rescue Reviews</h2>
+            
+            <div class="search-controls">
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Search by rescue name...">
+                    <button id="clearSearch">Clear</button>
+                </div>
+                
+                <div class="filter-controls">
+                    <select id="ratingFilter">
+                        <option value="">All Ratings</option>
+                        <option value="5">5 Stars</option>
+                        <option value="4">4+ Stars</option>
+                        <option value="3">3+ Stars</option>
+                        <option value="2">2+ Stars</option>
+                        <option value="1">1+ Stars</option>
+                    </select>
+                    
+                    <select id="activityFilter">
+                        <option value="">All Activities</option>
+                        <option value="animal-care">Animal Care</option>
+                        <option value="dog-walking">Dog Walking</option>
+                        <option value="cat-socialization">Cat Socialization</option>
+                        <option value="cleaning">Cleaning & Maintenance</option>
+                        <option value="events">Events & Fundraising</option>
+                        <option value="transport">Animal Transport</option>
+                        <option value="admin">Administrative</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="search-stats">
+                <div id="searchStats"></div>
+            </div>
+
+            <div id="searchResults" class="feedback-list">
+                <!-- Search results will be displayed here -->
+            </div>
+        </section>
+
+        <section id="recent-feedback" class="feedback-display">
+            <h2>Recent Feedback</h2>
+            <div id="feedbackList" class="feedback-list">
+                <!-- Feedback items will be displayed here -->
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
