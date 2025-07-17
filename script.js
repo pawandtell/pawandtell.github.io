@@ -9,15 +9,7 @@ class VolunteerFeedbackApp {
         };
         this.currentTab = 'submit';
         this.filteredResults = [];
-        
-        // GitHub storage configuration
-        this.githubStorage = {
-            owner: 'pawandtell',
-            repo: 'pawandtell.github.io',
-            branch: 'main',
-            dataPath: 'data/feedback.json',
-            apiBase: 'https://api.github.com'
-        };
+        this.apiUrl = 'http://localhost:3001/feedback';
 
         this.initializeEventListeners();
         this.loadFeedback();
@@ -390,26 +382,20 @@ class VolunteerFeedbackApp {
         }
     }
 
-    // GitHub Storage Methods
+    // API Methods for persistent storage
     async loadFeedback() {
         try {
-            const url = `${this.githubStorage.apiBase}/repos/${this.githubStorage.owner}/${this.githubStorage.repo}/contents/${this.githubStorage.dataPath}`;
-            const response = await fetch(url);
-            
-            if (response.status === 404) {
-                // File doesn't exist yet, use empty array
-                this.feedbackData = [];
-            } else if (response.ok) {
-                const data = await response.json();
-                const content = atob(data.content); // Decode base64
-                this.feedbackData = JSON.parse(content);
+            const response = await fetch(this.apiUrl);
+            if (response.ok) {
+                this.feedbackData = await response.json();
                 // Sort by timestamp (newest first)
                 this.feedbackData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             } else {
-                throw new Error(`GitHub API error: ${response.status}`);
+                console.warn('Failed to load feedback from server, using localStorage fallback');
+                this.loadFromLocalStorage();
             }
         } catch (error) {
-            console.warn('Failed to load from GitHub, using localStorage fallback:', error);
+            console.warn('Server not available, using localStorage fallback:', error);
             this.loadFromLocalStorage();
         }
         
@@ -418,67 +404,24 @@ class VolunteerFeedbackApp {
 
     async saveFeedback(feedbackData) {
         try {
-            // Save to localStorage immediately for instant feedback
-            this.saveToLocalStorage(feedbackData);
-            
-            // Also attempt to create a GitHub issue (if configured)
-            await this.createGitHubIssue(feedbackData);
-            
-            console.log('Feedback saved locally and submitted to GitHub');
-            
+            const response = await fetch(this.apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(feedbackData)
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to save to server');
+            }
+
+            return await response.json();
         } catch (error) {
-            console.warn('Failed to save feedback:', error);
+            console.warn('Failed to save to server, using localStorage fallback:', error);
             this.saveToLocalStorage(feedbackData);
             throw error;
         }
-    }
-
-    // GitHub write operations (requires authentication)
-    async saveToGitHub(feedbackArray) {
-        // This would require a GitHub Personal Access Token
-        // For security, this should be handled by a backend service
-        console.warn('GitHub write operations require authentication and should be handled server-side');
-        
-        // Alternative: Create a GitHub Issue for each feedback
-        return this.createGitHubIssue(feedbackArray[0]);
-    }
-
-    async createGitHubIssue(feedbackData) {
-        // This creates a GitHub issue for each feedback submission
-        // Requires authentication but provides a public way to store feedback
-        const issueTitle = `Feedback: ${feedbackData.rescueName} - ${feedbackData.ratings.overall}★`;
-        const issueBody = this.formatFeedbackAsIssue(feedbackData);
-        
-        console.log('Would create GitHub issue:', { title: issueTitle, body: issueBody });
-        
-        // In production, this would make an authenticated API call
-        // For now, just log the data structure
-        return { title: issueTitle, body: issueBody };
-    }
-
-    formatFeedbackAsIssue(feedback) {
-        const stars = '★'.repeat(feedback.ratings.overall) + '☆'.repeat(5 - feedback.ratings.overall);
-        
-        return `## Volunteer Feedback
-
-**Rescue:** ${feedback.rescueName}
-**Volunteer:** ${feedback.volunteerName}
-**Activity:** ${feedback.volunteerType || 'Not specified'}
-**Overall Rating:** ${stars} (${feedback.ratings.overall}/5)
-
-### Detailed Ratings
-- **Organization & Communication:** ${'★'.repeat(feedback.ratings.organization || 0)}${'☆'.repeat(5 - (feedback.ratings.organization || 0))}
-- **Staff Support & Training:** ${'★'.repeat(feedback.ratings.support || 0)}${'☆'.repeat(5 - (feedback.ratings.support || 0))}
-- **Facility Conditions:** ${'★'.repeat(feedback.ratings.facility || 0)}${'☆'.repeat(5 - (feedback.ratings.facility || 0))}
-
-### Feedback
-${feedback.feedback}
-
-**Recommends to others:** ${feedback.recommend ? 'Yes ✓' : 'No'}
-
----
-*Submitted: ${new Date(feedback.timestamp).toLocaleString()}*
-${feedback.email ? `*Contact: ${feedback.email}*` : ''}`;
     }
 
     // Fallback methods for when server is not available
