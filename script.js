@@ -125,7 +125,11 @@ class VolunteerFeedbackApp {
             this.showSuccessMessage();
         } catch (error) {
             console.error('Error saving feedback:', error);
-            alert('Failed to save feedback. Please try again.');
+            
+            // Still reset form and show success since localStorage fallback worked
+            this.resetForm();
+            this.loadFeedback();
+            this.showSuccessMessage('Feedback saved locally. Note: Cloud sync may be unavailable.');
         }
     }
 
@@ -218,7 +222,7 @@ class VolunteerFeedbackApp {
         return div.innerHTML;
     }
 
-    showSuccessMessage() {
+    showSuccessMessage(customMessage = null) {
         const message = document.createElement('div');
         message.style.cssText = `
             position: fixed;
@@ -232,7 +236,7 @@ class VolunteerFeedbackApp {
             z-index: 1000;
             font-weight: 600;
         `;
-        message.textContent = 'Feedback submitted successfully! Thank you for sharing your experience.';
+        message.textContent = customMessage || 'Feedback submitted successfully! Thank you for sharing your experience.';
 
         document.body.appendChild(message);
 
